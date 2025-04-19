@@ -1,51 +1,65 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const FileUpload = ({ onClose, onUploadSuccess }) => {
+const FileUpload = ({ token, onUploadSuccess, onCancel }) => {
   const [selectedFiles, setSelectedFiles] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFileChange = (e) => {
+    setSelectedFiles(e.target.files);
+    setError('');
+  };
 
   const handleUpload = async () => {
-    if (!selectedFiles) return;
-    
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append('files', selectedFiles[i]);
+    if (!selectedFiles || selectedFiles.length === 0) {
+      return setError('Please select at least one file to upload.');
     }
 
+    const formData = new FormData();
+    Array.from(selectedFiles).forEach((file) => {
+      formData.append('files', file);
+    });
+
     try {
-      setIsUploading(true);
-      const token = localStorage.getItem('adminToken');
-      await axios.post('http://localhost:8080/api/files/upload', formData, {
+      setUploading(true);
+      const res = await axios.post('http://localhost:8080/api/files/upload', formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
-      onUploadSuccess();
-      onClose();
+
+      setUploading(false);
+      onUploadSuccess(res.data.files);
+      setSelectedFiles(null);
     } catch (err) {
-      console.error('Upload failed:', err);
-    } finally {
-      setIsUploading(false);
+      console.error(err);
+      setUploading(false);
+      setError(err.response?.data?.error || 'Upload failed. Try again.');
     }
   };
 
   return (
-    <div className="upload-modal">
-      <h3>Upload Files</h3>
+    <div className="upload-container">
+      <h2>Upload Files</h2>
+
       <input
         type="file"
         multiple
-        onChange={(e) => setSelectedFiles(e.target.files)}
+        onChange={handleFileChange}
       />
-      <div className="upload-actions">
-        <button onClick={onClose}>Cancel</button>
-        <button 
+
+      {error && <p className="error-msg">{error}</p>}
+
+      <div className="btn-group">
+        <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+        <button
+          className="upload-btn"
           onClick={handleUpload}
-          disabled={!selectedFiles || isUploading}
+          disabled={uploading}
         >
-          {isUploading ? 'Uploading...' : 'Upload'}
+          {uploading ? 'Uploading...' : 'Upload'}
         </button>
       </div>
     </div>

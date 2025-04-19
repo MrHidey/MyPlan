@@ -9,8 +9,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 let gfs;
+let downloadCollection;
+
 mongoose.connection.once('open', () => {
   gfs = new GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
+  downloadCollection = mongoose.connection.db.collection('fileDownloads');
 });
 
 const verifyToken = (req, res, next) => {
@@ -24,6 +27,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+// ⬇️ Upload files
 router.post('/upload', verifyToken, upload.array('files', 10), async (req, res) => {
   try {
     if (!req.files?.length) {
@@ -39,7 +43,14 @@ router.post('/upload', verifyToken, upload.array('files', 10), async (req, res) 
           }
         });
         uploadStream.end(file.buffer);
-        uploadStream.on('finish', () => resolve(uploadStream.id));
+        uploadStream.on('finish', async () => {
+          // Init download count to 0
+          await downloadCollection.insertOne({
+            fileId: uploadStream.id,
+            downloads: 0
+          });
+          resolve(uploadStream.id);
+        });
         uploadStream.on('error', reject);
       });
     }));
@@ -53,15 +64,29 @@ router.post('/upload', verifyToken, upload.array('files', 10), async (req, res) 
   }
 });
 
+// ⬇️ Get all files with download count
 router.get('/', async (req, res) => {
   try {
     const files = await gfs.find().sort({ uploadDate: -1 }).toArray();
-    res.json(files);
+    const downloadData = await downloadCollection.find().toArray();
+
+    const downloadMap = {};
+    downloadData.forEach(entry => {
+      downloadMap[entry.fileId.toString()] = entry.downloads;
+    });
+
+    const filesWithDownloads = files.map(file => ({
+      ...file,
+      downloads: downloadMap[file._id.toString()] || 0
+    }));
+
+    res.json(filesWithDownloads);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// ⬇️ Download a file and increment download count
 router.get('/:id', async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
@@ -70,10 +95,17 @@ router.get('/:id', async (req, res) => {
 
     const fileId = new ObjectId(req.params.id);
     const file = await gfs.find({ _id: fileId }).next();
-    
+
     if (!file) {
       return res.status(404).json({ error: 'File not found' });
     }
+
+    // Increment download count
+    await downloadCollection.updateOne(
+      { fileId: fileId },
+      { $inc: { downloads: 1 } },
+      { upsert: true }
+    );
 
     const downloadStream = gfs.openDownloadStream(fileId);
     res.set('Content-Type', file.contentType || 'application/octet-stream');
