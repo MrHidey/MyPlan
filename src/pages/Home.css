@@ -1,0 +1,40 @@
+.homepage {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+
+.homepage h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.note-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-top: 2rem;
+  justify-content: center;
+}
+
+/* Optional: make cards slightly smaller */
+.note-card {
+  max-width: 220px;
+  margin: auto;
+}
+
+/* Responsive behavior */
+@media (min-width: 1024px) {
+  .note-list {
+    grid-template-columns: repeat(5, 1fr); /* 5 columns on large screens */
+  }
+}
+
+@media (max-width: 600px) {
+  .note-list {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+  }
+}
+

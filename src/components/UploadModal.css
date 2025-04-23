@@ -1,0 +1,71 @@
+.upload-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.upload-modal h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.upload-modal label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.upload-modal input, 
+.upload-modal select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.upload-modal button {
+  width: 48%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 4%;
+  margin-bottom: 1%;
+  transition: all 0.3s ease;
+}
+
+.upload-modal button[type='submit'] {
+  background-color: #28a745;
+  color: white;
+}
+
+.upload-modal button[type='submit']:hover {
+  background-color: #218838;
+}
+
+.upload-modal button[type='button'] {
+  background-color: #dc3545;
+  color: white;
+}
+
+.upload-modal button[type='button']:hover {
+  background-color: #c82333;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
