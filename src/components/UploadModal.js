@@ -3,16 +3,19 @@ import axios from 'axios';
 import './UploadModal.css';
 import { toast } from 'react-toastify';
 
-
 const UploadModal = ({ isOpen, onClose, onSuccess }) => {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [course, setCourse] = useState('');
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleUpload = async () => {
-    if (!title || !subject || !file) return toast.error('all fields are required!');;
+    if (!title || !subject || !file) {
+      toast.error('All fields are required!');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('title', title);
@@ -27,14 +30,21 @@ const UploadModal = ({ isOpen, onClose, onSuccess }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
         },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded*100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        }
       });
 
       onSuccess();
       toast.success('Note uploaded successfully!');
       onClose();
+      setUploadProgress(0);
     } catch (err) {
       toast.error('Something went wrong!');
-
+      setUploadProgress(0);
     }
     setUploading(false);
   };
@@ -65,11 +75,23 @@ const UploadModal = ({ isOpen, onClose, onSuccess }) => {
         />
         <input type="file" onChange={(e) => setFile(e.target.files[0])} />
 
+        {uploading && (
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${uploadProgress}%` }}></div>
+            <span>{uploadProgress}%</span>
+          </div>
+        )}
+
         <div className="modal-actions">
           <button onClick={handleUpload} disabled={uploading}>
             {uploading ? 'Uploading...' : 'Upload'}
           </button>
-          <button className="cancel-btn" onClick={onClose}>Cancel</button>
+          <button className="cancel-btn" onClick={() => {
+            onClose();
+            setUploadProgress(0);
+          }}>
+            Cancel
+          </button>
         </div>
       </div>
     </div>
