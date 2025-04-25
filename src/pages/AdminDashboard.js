@@ -30,7 +30,7 @@ const AdminDashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE}/api/notes/dashboard`, {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE}/notes/dashboard`, {
           headers: { Authorization: `Bearer ${token}` }
         });
   
@@ -59,7 +59,7 @@ const AdminDashboard = () => {
   
     setTimeout(async () => {
       try {
-        await axios.delete(`${process.env.REACT_APP_API_BASE}/api/notes/${id}`, {
+        await axios.delete(`${process.env.REACT_APP_API_BASE}/notes/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setNotes(notes.filter(n => n._id !== id));

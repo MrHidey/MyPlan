@@ -16,7 +16,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_BASE}/api/auth/login`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_BASE}/auth/login`, {
         email,
         password
       });
@@ -28,8 +28,7 @@ const Login = () => {
       }, 1000);
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed.';
-      toast.error({ type: 'error', message: msg });
-      toast.error('Invalid credentials');
+      toast.error(msg);  // Just pass the string message    
     }
   };
 

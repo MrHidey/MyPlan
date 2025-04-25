@@ -22,7 +22,7 @@ const UploadModal = ({ isOpen, onClose, onSuccess }) => {
 
     setUploading(true);
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_BASE}/api/notes`, formData, {
+      const res = await axios.post(`${process.env.REACT_APP_API_BASE}/notes`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
