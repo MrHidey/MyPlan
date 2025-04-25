@@ -14,14 +14,27 @@ const uploadNote = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Upload file manually to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'notes-app',
-      resource_type: 'raw',
-    });
+    // Upload file buffer manually to Cloudinary
+    const streamUpload = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'notes-app',
+            resource_type: 'auto',
+          },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        stream.end(fileBuffer);
+      });
+    };
 
-    // Remove temp file from server after upload
-    fs.unlinkSync(req.file.path);
+    const result = await streamUpload(req.file.buffer);
 
     const newNote = await Note.create({
       title,
@@ -37,6 +50,7 @@ const uploadNote = async (req, res) => {
     res.status(500).json({ message: 'Server error during upload' });
   }
 };
+
 
 const getDashboardData = asyncHandler(async (req, res) => {
   try {
