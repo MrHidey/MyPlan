@@ -12,7 +12,7 @@ const BookAnimation = () => {
       </div>
       
       <div className="search-empty-message">
-        <h3>No notes found at this found</h3>
+        <h3>No notes found at this time</h3>
       </div>
     </div>
   );
