@@ -12,8 +12,7 @@ const BookAnimation = () => {
       </div>
       
       <div className="search-empty-message">
-        <h3>No notes found matching your search</h3>
-        <p>Try different keywords</p>
+        <h3>No notes found at this found</h3>
       </div>
     </div>
   );

@@ -34,7 +34,7 @@
 
 @media (max-width: 600px) {
   .note-list {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+    grid-template-columns: repeat(1, 1fr); /* 2 columns on small screens */
   }
 }
 
